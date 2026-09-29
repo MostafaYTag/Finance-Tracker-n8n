@@ -1,0 +1,276 @@
+{
+  "name": "Finance_Tracker_notion",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -912,
+        160
+      ],
+      "id": "42eea648-2022-4b92-8a9b-425eec0c4185",
+      "name": "Telegram Trigger"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.message.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Amount",
+              "description": "=Extract the transaction amount.\n\nRules:\n- Return only the numeric value.\n- Do not include currency symbols or text.\n- Currency is EGP unless another currency is explicitly mentioned.\n- Understand Arabic and English numerals.\n- Do not confuse the amount with dates, IDs, phone numbers, or other numbers.\n- The amount is the money paid or received in the transaction.\n\nExamples:\n\"صرفت 400 جنيه\" → 400\n\"دفعت ١٥٠\" → 150\n\"قبضت 12000 جنيه\" → 12000\n\"دفعت 8 آلاف\" → 8000",
+              "required": true
+            },
+            {
+              "name": "Date",
+              "description": "=Extract the transaction date.\n\nReference date:\n{{ $now.toFormat('yyyy-MM-dd') }}\n\nRules:\n- If no date is mentioned → use the reference date.\n- \"النهارده\", \"اليوم\" → reference date.\n- \"امبارح\", \"أمس\" → 1 day before reference date.\n- \"من يومين\" → 2 days before reference date.\n- \"من 3 أيام\", \"من ثلاث أيام\", \"من تلات أيام\", \"من ثلات أيام\" → 3 days before reference date.\n- Understand Egyptian Arabic date expressions.\n- Dates like \"14-8\" or \"14/8\" → August 14 of the current year unless a year is specified.\n- Always return YYYY-MM-DD.\n",
+              "required": true
+            },
+            {
+              "name": "category",
+              "description": "=Classify the transaction category.\n\nIMPORTANT:\nFirst determine whether the transaction is Income or Expense.\n\nIf the transaction is Income:\n- Always return: Income\n\nIf the transaction is an Expense, classify it into exactly one:\n- Essential\n- Luxury\n- Savings\n- Investment\n\nDefinitions:\n- Essential: necessary living expenses such as food, transportation, rent, bills, healthcare.\n- Luxury: non-essential consumption such as restaurants, entertainment, games, vacations, and personal shopping.\n- Savings: money intentionally set aside as savings.\n- Investment: money spent to acquire an asset or improve future earning potential, including stocks, gold, real estate, investment funds, professional courses, certifications, and career education.\n\nFor courses, certifications, and professional education:\n→ Investment\n\nReturn exactly one:\nIncome\nEssential\nLuxury\nSavings\nInvestment\n",
+              "required": true
+            },
+            {
+              "name": "Transaction Type",
+              "description": "=Classify the transaction as exactly one of:\n\n- Expenses: money paid/spent by the user.\n- Income: money received by the user.\n\nExamples:\n\"دفعت 800 جنيه\" → Expenses\n\"اشتريت حاجة بـ 500\" → Expenses\n\"قبضت 15000\" → Income\n\"استلمت 2000 من شغل\" → Income\n\nReturn exactly one:\nExpenses\nIncome\n",
+              "required": true
+            },
+            {
+              "name": "Payment Method",
+              "description": "=Identify the payment method explicitly mentioned by the user.\n\nAllowed values:\nCash\nWallet Cash\nInstapay\nVisa\n\nRules:\n- If the user explicitly mentions the payment method, use it.\n- If no payment method is mentioned, return Cash.\n- Never infer the payment method from context.\n- Return exactly one value.",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        160
+      ],
+      "id": "226135a3-08e7-4e61-b9ae-5ad3a69169e2",
+      "name": "Information Extractor",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output['Transaction Type'] }}",
+                    "rightValue": "=Expenses",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c08483b9-83b9-44fa-ade5-90e93458c7a2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Expense"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2130d2bd-5f26-4d30-98d7-767b4a88263e",
+                    "leftValue": "={{ $json.output['Transaction Type'] }}",
+                    "rightValue": "Income",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Income"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        160
+      ],
+      "id": "1ea69461-7b37-42ef-ad79-b1a7a7f1890b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "title": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Amount|number",
+              "numberValue": "={{ Number($json.output.Amount) }}"
+            },
+            {
+              "key": "Transaction Date|date",
+              "includeTime": false,
+              "date": "={{ $json.output.Date }}"
+            },
+            {
+              "key": "Income Item|title",
+              "title": "={{ $('Telegram Trigger').item.json.message.text }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        0,
+        256
+      ],
+      "id": "d03e26cc-512d-46f9-8238-c70060e3585e",
+      "name": "Income"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "title": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Amount|number",
+              "numberValue": "={{ Number($json.output.Amount) }}"
+            },
+            {
+              "key": "Transaction Date|date",
+              "includeTime": false,
+              "date": "={{ $json.output.Date }}"
+            },
+            {
+              "key": "Category|select",
+              "selectValue": "={{ $json.output.category }}"
+            },
+            {
+              "key": "Description|title",
+              "title": "={{ $('Telegram Trigger').item.json.message.text }}"
+            },
+            {
+              "key": "Payment Method|select",
+              "selectValue": "={{ $json.output['Payment Method'] }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3b721177-2475-4634-bfc5-0381c6b9b891",
+      "name": "Expense"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        320
+      ],
+      "id": "56b60d9a-fdd6-4aaa-a651-809303d0f4b8",
+      "name": "OpenRouter Chat Model"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Expense",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Income",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
