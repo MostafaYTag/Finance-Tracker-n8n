@@ -4,10 +4,6 @@ An automated personal finance tracking workflow built with n8n, Telegram, Notion
 
 The goal of this project is to make recording daily financial transactions simple: instead of manually entering every transaction into a spreadsheet or database, the user can simply send a message through Telegram, and the workflow automatically extracts the transaction details, classifies the transaction, and stores it in the appropriate Notion database.
 
-## Workflow
-
-![Finance Tracker n8n Workflow](./Workflow.png)
-
 
 🎯 Project Goal
 
@@ -22,6 +18,10 @@ or:
 قبضت 12000 جنيه من الشغل
 
 The workflow analyzes the message and automatically determines the relevant financial information before saving the transaction to Notion.
+
+## Workflow
+
+![Finance Tracker n8n Workflow](./Workflow.png)
 
 ⚙️ How It Works
 Telegram Message
