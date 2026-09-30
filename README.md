@@ -1,29 +1,34 @@
-💰 Finance Tracker — n8n
+# 💰 Finance Tracker — n8n
 
-An automated personal finance tracking workflow built with n8n, Telegram, Notion, and AI.
+An automated personal finance tracker built with **n8n, Telegram, Notion, and AI**.
 
-The goal of this project is to make recording daily financial transactions simple: instead of manually entering every transaction into a spreadsheet or database, the user can simply send a message through Telegram, and the workflow automatically extracts the transaction details, classifies the transaction, and stores it in the appropriate Notion database.
+The idea is simple: instead of manually adding every transaction to a spreadsheet or database, you can just send a message to a Telegram bot. The workflow reads the message, extracts the important details, figures out what type of transaction it is, and saves everything to the right Notion database automatically.
 
+## 🎯 Project Goal
 
-🎯 Project Goal
+The goal of this project is to make tracking daily finances as quick and natural as possible.
 
-The workflow is designed to automate personal finance tracking using natural language.
+You can send a message in plain language, for example:
 
-For example, the user can send messages such as:
-
+```text
 دفعت 150 جنيه مواصلات كاش
+```
 
 or:
 
+```text
 قبضت 12000 جنيه من الشغل
+```
 
-The workflow analyzes the message and automatically determines the relevant financial information before saving the transaction to Notion.
+The workflow processes the message and extracts the relevant financial information before storing it in Notion.
 
-## Workflow
+## ⚙️ How It Works
 
 ![Finance Tracker n8n Workflow](./Workflow.png)
 
-⚙️ How It Works
+The workflow follows a simple flow:
+
+```text
 Telegram Message
        ↓
 Telegram Trigger
@@ -39,155 +44,128 @@ Categorization   Income Database
 Expenses Database
        ↓
       Notion
+```
 
-1. Telegram Trigger
+### 1. Telegram Trigger
 
-The workflow receives the user's financial transaction through a Telegram bot.
+The workflow starts when the user sends a financial transaction through the Telegram bot.
 
-2. Information Extraction
+### 2. Information Extraction
 
-The AI extracts structured information from the natural-language message, including:
+The AI reads the message and extracts the information needed to record the transaction, such as:
 
-Amount
+* Amount
+* Transaction date
+* Transaction type
+* Category
+* Payment method
 
-Transaction date
+It can also understand both **Arabic and English numbers**, as well as common Egyptian Arabic expressions for dates.
 
-Transaction type
+### 3. Transaction Classification
 
-Category
+Each transaction is classified as either:
 
-Payment method
+* **Income**
+* **Expense**
 
-The workflow also understands Arabic and English numbers and common Egyptian Arabic date expressions.
+The workflow then sends it down the appropriate path.
 
-3. Transaction Classification
+### 4. Expense Categorization
 
-The transaction is classified as either:
+Expenses are further grouped into four categories:
 
-Income
+* **Essential** — food, transportation, rent, bills, healthcare, etc.
+* **Luxury** — restaurants, entertainment, games, vacations, personal shopping, etc.
+* **Savings** — money intentionally set aside for savings.
+* **Investment** — investments, professional courses, certifications, career education, and similar future-focused spending.
 
-Expenses
+### 5. Notion Database
 
-The workflow then routes the transaction to the appropriate path.
+Once the transaction has been processed, it is saved to the appropriate Notion database.
 
-4. Expense Categorization
+Income and expenses are kept separately, which makes it easier to organize and analyze financial activity later.
 
-Expenses are automatically classified into:
+## 🛠️ Technologies Used
 
-Essential — food, transportation, rent, bills, healthcare, etc.
+* **n8n** — Workflow automation
+* **Telegram** — Interface for sending transactions
+* **OpenRouter** — AI model connection
+* **Notion** — Financial data storage
+* **AI Information Extraction** — Converts natural-language messages into structured data
 
-Luxury — restaurants, entertainment, games, vacations, personal shopping, etc.
+## ✨ Features
 
-Savings — money intentionally set aside as savings.
+* Natural-language transaction input
+* Arabic and English number recognition
+* Automatic date extraction
+* Automatic income/expense classification
+* Automatic expense categorization
+* Payment method detection
+* Telegram integration
+* Notion database integration
+* AI-powered information extraction
+* No manual data entry required
 
-Investment — investments, professional courses, certifications, career education, and similar future-oriented spending.
+## 📌 Example
 
-5. Notion Database
+### User Input
 
-The transaction is finally stored in the appropriate Notion database.
-
-Income and expenses are maintained separately, making it easier to organize and analyze financial activity.
-
-🧩 Workflow
-
-🛠️ Technologies Used
-
-n8n — Workflow automation
-
-Telegram — User interface for sending transactions
-
-OpenRouter — AI model connection
-
-Notion — Financial data storage
-
-AI Information Extraction — Converts natural-language messages into structured financial data
-
-✨ Features
-
-Natural-language transaction input
-
-Arabic and English number recognition
-
-Automatic date extraction
-
-Automatic income/expense classification
-
-Automatic expense categorization
-
-Payment method detection
-
-Telegram integration
-
-Notion database integration
-
-AI-powered information extraction
-
-No manual data entry required
-
-📌 Example
-User Input
-
+```text
 دفعت 400 جنيه أكل فيزا
+```
 
-Extracted Data
+### Extracted Data
+
+```text
 Amount: 400
 Date: Current Date
-Transaction Type: Expenses
+Transaction Type: Expense
 Category: Essential
 Payment Method: Visa
+```
 
+The workflow then automatically saves the transaction to the **Expenses** database in Notion.
 
-The workflow then automatically saves the transaction to the Expenses database in Notion.
+## 📥 Installation
 
-📥 Installation
+1. Download `Finance_Tracker_notion.json`.
+2. Open your n8n instance.
+3. Import the workflow JSON file.
+4. Configure your Telegram credentials.
+5. Configure your OpenRouter credentials.
+6. Connect your Notion account and select the required databases.
+7. Activate the workflow.
+8. Send a transaction through your Telegram bot.
 
-Download Finance_Tracker_notion.json.
+> **Note:** Credentials are not included in this repository. You'll need to configure your own credentials inside n8n.
 
-Open your n8n instance.
+## 📄 Project Structure
 
-Import the JSON workflow.
-
-Configure your Telegram credentials.
-
-Configure your OpenRouter credentials.
-
-Connect your Notion account and select the required databases.
-
-Activate the workflow.
-
-Send a transaction through your Telegram bot.
-
-Note: Credentials are not included in this repository. You must configure your own credentials inside n8n.
-
-📄 Project Structure
+```text
 Finance-Tracker-n8n/
 │
 ├── Finance_Tracker_notion.json
 ├── workflow.png
 └── README.md
+```
 
-🚀 Future Improvements
+## 🚀 Future Improvements
 
-Possible future improvements include:
+Some ideas for future versions include:
 
-Monthly financial summaries
+* Monthly financial summaries
+* Spending analytics
+* Budget tracking
+* Telegram reports
+* Automatic monthly reports
+* Charts and dashboards
+* Multi-currency support
+* Recurring transaction detection
+* Financial goals tracking
 
-Spending analytics
+## 👨‍💻 About the Project
 
-Budget tracking
+This project was built as an automation experiment combining **n8n, AI, Telegram, and Notion** to make personal finance tracking easier.
 
-Telegram reports
-
-Automatic monthly reports
-
-Charts and dashboards
-
-Multi-currency support
-
-Recurring transaction detection
-
-Financial goals tracking
-
-👨‍💻 Project
-
-Built as an automation project using n8n + AI + Telegram + Notion to simplify personal finance tracking.
+Instead of filling out forms or manually updating a database, you can simply send a message describing the transaction and let the workflow handle the rest.
