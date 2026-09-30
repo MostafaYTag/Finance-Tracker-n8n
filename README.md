@@ -6,7 +6,7 @@ The goal of this project is to make recording daily financial transactions simpl
 
 ## Workflow
 
-![Finance Tracker n8n Workflow](./workflow.png)
+![Finance Tracker n8n Workflow](./Workflow.png)
 
 
 🎯 Project Goal
