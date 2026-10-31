@@ -1,0 +1,689 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2ac18db7-11da-4eba-ab8b-1f2d2df07138",
+      "name": "Telegram Trigger",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Expenses",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "c08483b9-83b9-44fa-ade5-90e93458c7a2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Expense"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2130d2bd-5f26-4d30-98d7-767b4a88263e",
+                    "leftValue": "={{ $json['Transaction Type'] }}",
+                    "rightValue": "Income",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Income"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        -208
+      ],
+      "id": "98057064-ed9f-4606-a525-1012754435ec",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Income (Monthly)",
+          "cachedResultUrl": ""
+        },
+        "title": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Amount|number",
+              "numberValue": "={{ $json.Amount }}"
+            },
+            {
+              "key": "Transaction Date|date",
+              "includeTime": false,
+              "date": "={{ $json.Date }}"
+            },
+            {
+              "key": "Income Item|title",
+              "title": "={{ $('Telegram Trigger').item.json.message.text }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        -80
+      ],
+      "id": "d7d59060-4562-4075-ae6e-af878f5df718",
+      "name": "Income",
+      "credentials": {
+        "notionApi": {
+          "id": "",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Expenses (Monthly)",
+          "cachedResultUrl": ""
+        },
+        "title": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Amount|number",
+              "numberValue": "={{ Number($json.Amount) }}"
+            },
+            {
+              "key": "Transaction Date|date",
+              "includeTime": false,
+              "date": "={{ $json.Date }}"
+            },
+            {
+              "key": "Category|select",
+              "selectValue": "={{ $json.category }}"
+            },
+            {
+              "key": "Description|title",
+              "title": "={{ $('Telegram Trigger').item.json.message.text }}"
+            },
+            {
+              "key": "Payment Method|select",
+              "selectValue": "={{ $json['Payment Method'] }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        -288
+      ],
+      "id": "387c340f-6999-4315-aa1b-7f8e48ac369b",
+      "name": "Expense",
+      "credentials": {
+        "notionApi": {
+          "id": "",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{\n  \"Telegram Date: \" +\n  DateTime.fromSeconds($json.message.date)\n    .setZone('Africa/Cairo')\n    .toISO() +\n  \"\\nUser Message: \" +\n  $json.message.text\n}}",
+        "options": {
+          "systemMessage": "=ROLE\n\nYou are an intelligent Personal Finance Assistant responsible for understanding, recording, and analyzing the user's financial activities.\n\nYou understand Egyptian Arabic, Modern Standard Arabic, and English.\n\nAlways reply in natural Egyptian Arabic.\n\nYour responsibilities:\n\nUnderstand user messages and detect their intent.\nExtract financial transactions accurately.\nClassify income and expenses.\nRetrieve financial records from Notion using connected tools.\nAnalyze financial data and calculate totals.\nCompare financial periods.\nAnswer general financial questions.\nAsk for clarification when essential information is missing.\nLANGUAGE AND NUMBERS\n\nUnderstand Arabic and English numerals and Egyptian financial expressions.\n\nExamples:\n\nألف = 1000\nألفين = 2000\nتلات تلاف = 3000\nنص مليون = 500000\n\nNever confuse transaction amounts with dates, phone numbers, or IDs.\n\nINTENT DETECTION\n\nEvery message must have exactly one intent:\n\nTransaction: The user reports receiving or spending money.\nAnalysis: The user asks about financial records, totals, spending, income, savings, or comparisons.\nGeneral: General financial questions or conversation.\nClarification: Essential transaction information is missing or ambiguous.\n\n\nExamples:\n\n\"صرفت 500 جنيه\" → Transaction\n\"قبضت 12000 جنيه\" → Transaction\n\"صرفت كام الشهر ده؟\" → Analysis\n\"أكتر حاجة بصرف عليها إيه؟\" → Analysis\n\"إزاي أوفر فلوس؟\" → General\n\nIMPORTANT: Never classify a financial question as a transaction. Never count internal transfers as income or expenses. Do not create transactions for hypothetical examples.\n\nTRANSACTION EXTRACTION\n\nWhen Intent = Transaction, extract:\n\n1. Amount\nReturn a numeric value only.\nDefault currency is EGP.\nConvert Arabic and written amounts into numbers.\nNever invent an amount.\nAmount is mandatory.\nIf missing, ask for clarification.\n2. Date\n\nTimezone: Africa/Cairo.\n\nUse the Telegram message timestamp supplied in the User Prompt as the transaction reference date.\n\nRules:\n\nIf no date is mentioned, use the Telegram message date.\nالنهارده = reference date.\nامبارح = one day before.\nمن يومين = two days before.\nمن 3 أيام = three days before.\nUnderstand Egyptian Arabic date expressions.\nDates such as 14/8 use the reference year unless another year is specified.\nReturn dates as YYYY-MM-DD.\nNever invent or guess ambiguous dates.\n\nThe current system date is: {{ $now.setZone('Africa/Cairo').toFormat('yyyy-MM-dd') }}\n\nUse the current system date for financial period interpretation, not as a replacement for the Telegram transaction reference date.\n\n3. Transaction Type\n\nReturn exactly one:\n\nExpenses: Money paid or spent by the user.\nIncome: Money received by the user.\n\nExamples:\n\nدفعت 800 جنيه → Expenses\nاشتريت حاجة بـ 500 → Expenses\nقبضت 15000 → Income\nاستلمت مكافأة 2000 → Income\n\nAlways use Expenses, never Expense.\n\n4. Category\n\nFor Income:\n\nReturn Income.\n\nFor Expenses, choose exactly one:\n\nEssential: Necessary living expenses such as food, transportation, rent, bills, and healthcare.\nLuxury: Non-essential spending such as entertainment, restaurants, vacations, and personal shopping.\nSavings: Money intentionally set aside as savings.\nInvestment: Assets, stocks, gold purchased for investment, real estate, investment funds, professional courses, and certifications.\nUnknown: When the purpose cannot be determined.\n\nClassify according to the actual purpose of the transaction.\n\nAllowed values: Income, Essential, Luxury, Savings, Investment, Unknown.\n\n5. Payment Method\n\nAllowed values:\n\nCash\nWallet\nInstapay\nVisa\n\nRules:\n\nUse explicitly mentioned payment methods.\nIf not mentioned, return Cash.\nNever invent another payment method.\n\nFINANCIAL ANALYSIS\n\nWhen Intent = Analysis, retrieve actual records from connected Notion tools.\n\nGet Expenses Monthly\n\nUse for:\n\nExpense totals.\nDaily, weekly, monthly, and yearly spending.\nDate-range analysis.\nCategory analysis.\nExpense comparisons.\nGet Income Monthly\n\nUse for:\n\nIncome totals.\nSalary history.\nBonuses.\nDaily, weekly, monthly, and yearly income.\nIncome comparisons.\n\nUse BOTH tools when analyzing:\n\nIncome versus expenses.\nNet cash flow.\nSavings from income.\nOverall financial performance.\nMonthly financial comparisons.\nDATE FILTERING\n\nUse Africa/Cairo as the timezone.\n\nInterpret:\n\nالشهر ده = Current calendar month.\nالشهر اللي فات = Previous calendar month.\nالشهر الجاي = Next calendar month.\nالسنة دي = Current calendar year.\nالسنة اللي فاتت = Previous calendar year.\nالأسبوع ده = Current calendar week.\nامبارح = Yesterday.\nالنهارده = Today.\n\nAlways filter using the actual Transaction Date property.\n\nNever include records outside the requested period.\n\nFINANCIAL CALCULATIONS\n\nUse actual Notion records only.\n\nCalculate:\n\nTotal Expenses = Sum of expense amounts.\nTotal Income = Sum of income amounts.\nNet Cash Flow = Total Income - Total Expenses.\nCategory totals and percentages.\nDifferences between financial periods.\n\nPerform calculations carefully.\n\nNever invent financial records, totals, or percentages.\n\nIf data is missing or incomplete, explain the limitation.\n\nMEMORY AND CONTEXT\n\nUse conversation memory only to understand conversational context and follow-up questions.\n\nNever use conversational memory as a source of historical financial figures.\n\nAlways retrieve actual Notion records for financial history questions.\n\nTOOL RULES\nRetrieve actual records before answering historical financial questions.\nUse both Notion tools when both income and expenses are required.\nNever call Notion tools for ordinary transaction extraction.\nNever create a transaction when the user asks a question.\nNever claim that a tool succeeded unless it actually returned data.\nDo not assume missing financial records are zero.\nNever perform unsupported updates or deletions.\nOUTPUT FORMAT\n\nAlways return valid JSON matching the configured Structured Output Parser.\n\nRequired keys:\n\n{ \"Intent\": \"\", \"Amount\": null, \"Date\": \"\", \"category\": \"\", \"Transaction Type\": \"\", \"Payment Method\": \"\", \"Reply\": \"\" }\n\nNever add extra keys.\n\nTransaction\nIntent = Transaction.\nFill Amount, Date, category, Transaction Type, and Payment Method.\nReply = Short confirmation in Egyptian Arabic.\nAnalysis\nIntent = Analysis.\nAmount = null.\nDate = \"\".\ncategory = Unknown.\nTransaction Type = Unknown.\nPayment Method = Unknown.\nReply = Complete financial analysis in Egyptian Arabic.\nGeneral\nIntent = General.\nAmount = null.\nDate = \"\".\ncategory = Unknown.\nTransaction Type = Unknown.\nPayment Method = Unknown.\nReply = Natural conversational answer in Egyptian Arabic.\nClarification\nIntent = Clarification.\nAmount = null.\nDate = \"\".\ncategory = Unknown.\nTransaction Type = Unknown.\nPayment Method = Unknown.\nReply = Ask a clear question in Egyptian Arabic.\nFINAL RULES\nReturn JSON only.\nNo Markdown code fences.\nNo additional explanations outside JSON.\nAll required keys must always exist.\nUse null for missing Amount.\nUse empty strings and Unknown as specified.\nNever invent information.\nPrioritize financial accuracy over guessing."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "8467a24d-269e-47a2-bda4-da0daab79f48",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve expense records from the Expenses (Monthly) Notion database.\n\nUse this tool for:\n- Total expenses.\n- Daily, weekly, monthly, and yearly spending.\n- Date-range analysis.\n- Category breakdown.\n- Payment method analysis.\n- Monthly comparisons.\n\nAvailable fields:\n- Amount: property_amount\n- Transaction Date: property_transaction_date.start\n- Category: property_category\n- Payment Method: property_payment_method\n- Description: property_description\n- Record ID: id\n\nAlways use actual Transaction Date values.\nRetrieve and analyze actual records only.\nNever invent missing amounts or records.\nDo not use this tool to create or modify transactions.",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Expenses (Monthly)",
+          "cachedResultUrl": ""
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 3,
+      "position": [
+        560,
+        288
+      ],
+      "id": "e7db3946-0518-4e75-9103-17d5c13e9030",
+      "name": "Get Expenses Monthly",
+      "credentials": {
+        "notionApi": {
+          "id": "",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "\nRetrieve income records from the Income (Monthly) Notion database.\n\nUse this tool whenever the user asks about:\n- Total income.\n- Daily, weekly, monthly, or yearly income.\n- Salary history.\n- Bonuses and additional income.\n- Income within a specific date range.\n- Historical income comparisons.\n\nUse the actual Transaction Date property for all date-based analysis.\n\nAvailable fields:\n- Amount: property_amount\n- Transaction Date: property_transaction_date.start\n- Income Description: property_income_item\n- Record ID: id\n\nRetrieve actual records only.\nNever invent missing records or amounts.\n\nDo not use this tool for recording new income transactions.",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Income (Monthly)",
+          "cachedResultUrl": ""
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 3,
+      "position": [
+        400,
+        304
+      ],
+      "id": "30eb8863-f8d7-4b66-87ef-7d6a3c7a023a",
+      "name": "Get Income Monthly",
+      "credentials": {
+        "notionApi": {
+          "id": "",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.from.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        224
+      ],
+      "id": "e405da5f-91ba-4404-b1ea-9e02dd9606fc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        112,
+        224
+      ],
+      "id": "08ae2cdc-141a-435f-8380-a187f8467ca8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=تم الخصم بنجاح ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        -288
+      ],
+      "id": "7703510f-96c1-431b-8fc2-36a17cb5ae09",
+      "name": "Send Expenses text",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=تم الاضافة بنجاح ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        -80
+      ],
+      "id": "be531f3e-b3a0-49d5-8655-fe907801d3c4",
+      "name": "Send Income text",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('Parsing Data').item.json.Reply }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        -32
+      ],
+      "id": "ffe14a42-3f94-40f5-a022-a2c25365f797",
+      "name": "Send Analysis Message",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst raw = $json.output;\n\nif (!raw) {\n  throw new Error(\"AI Agent returned empty output\");\n}\n\nlet data;\n\ntry {\n  data = typeof raw === \"string\" ? JSON.parse(raw) : raw;\n} catch (error) {\n  throw new Error(\"Invalid AI JSON: \" + error.message);\n}\n\nconst required = [\n  \"Intent\",\n  \"Amount\",\n  \"Date\",\n  \"category\",\n  \"Transaction Type\",\n  \"Payment Method\",\n  \"Reply\"\n];\n\nfor (const key of required) {\n  if (!Object.prototype.hasOwnProperty.call(data, key)) {\n    throw new Error(`Missing required field: ${key}`);\n  }\n}\n\nconst validIntents = [\n  \"Transaction\",\n  \"Analysis\",\n  \"General\",\n  \"Clarification\",\n];\n\nif (!validIntents.includes(data.Intent)) {\n  throw new Error(\"Invalid Intent\");\n}\n\nconst validTypes = [\"Expenses\", \"Income\", \"Unknown\"];\n\nif (!validTypes.includes(data[\"Transaction Type\"])) {\n  throw new Error(\"Invalid Transaction Type\");\n}\n\nconst validCategories = [\n  \"Income\",\n  \"Essential\",\n  \"Luxury\",\n  \"Savings\",\n  \"Investment\",\n  \"Unknown\"\n];\n\nif (!validCategories.includes(data.category)) {\n  throw new Error(\"Invalid category\");\n}\n\nconst validMethods = [\n  \"Cash\",\n  \"Wallet\",\n  \"Instapay\",\n  \"Visa\",\n  \"Unknown\"\n];\n\nif (!validMethods.includes(data[\"Payment Method\"])) {\n  throw new Error(\"Invalid Payment Method\");\n}\n\nif (typeof data.Reply !== \"string\") {\n  throw new Error(\"Reply must be a string\");\n}\n\nif (data.Intent === \"Transaction\") {\n  if (\n    typeof data.Amount !== \"number\" ||\n    !Number.isFinite(data.Amount) ||\n    data.Amount <= 0\n  ) {\n    throw new Error(\"Transaction Amount must be a positive number\");\n  }\n\n  if (\n    data[\"Transaction Type\"] !== \"Expenses\" &&\n    data[\"Transaction Type\"] !== \"Income\"\n  ) {\n    throw new Error(\"Invalid transaction direction\");\n  }\n\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(data.Date)) {\n    throw new Error(\"Invalid transaction date format\");\n  }\n\n  const date = new Date(data.Date + \"T00:00:00Z\");\n\n  if (\n    Number.isNaN(date.getTime()) ||\n    date.toISOString().slice(0, 10) !== data.Date\n  ) {\n    throw new Error(\"Invalid transaction date\");\n  }\n}\n\n\nreturn [{ json: data }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "30b800a6-a6c3-4070-a153-f16330f76f20",
+      "name": "Parsing Data"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Intent }}",
+                    "rightValue": "Transaction",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "c08483b9-83b9-44fa-ade5-90e93458c7a2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Transaction"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2130d2bd-5f26-4d30-98d7-767b4a88263e",
+                    "leftValue": "={{ $json.Intent }}",
+                    "rightValue": "Analysis",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Analysis"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2aeac67c-2e94-43bf-bd3a-b2a84f2b9752",
+                    "leftValue": "={{ $json.Intent }}",
+                    "rightValue": "General",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "General"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f39dd079-325f-4d0b-9474-7237ad77944d",
+                    "leftValue": "={{ $json.Intent }}",
+                    "rightValue": "Clarification",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Clarification"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        -32
+      ],
+      "id": "a125f934-d786-4b22-bbf3-eb5994db5b96",
+      "name": "Type of Intent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        112
+      ],
+      "id": "1c2e5e20-d1a1-45b3-97a1-3bde570a9a04",
+      "name": "Send General Message",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Expense",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Income",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Income": {
+      "main": [
+        [
+          {
+            "node": "Send Income text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expense": {
+      "main": [
+        [
+          {
+            "node": "Send Expenses text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parsing Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Expenses Monthly": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Income Monthly": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsing Data": {
+      "main": [
+        [
+          {
+            "node": "Type of Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Type of Intent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Analysis Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send General Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send General Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  }
+}
