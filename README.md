@@ -35,7 +35,7 @@ The assistant supports four message intents:
 ---
 
 ## 📸 Workflow Preview
-![Finance Tracker Workflow](./workflow.png)
+![Finance Tracker Workflow](./Workflow.png)
 
 **High-level flow:**
 
