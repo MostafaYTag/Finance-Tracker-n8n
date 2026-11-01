@@ -324,7 +324,8 @@ Send the appropriate message after the request has been processed. The workflow 
 
 The Notion workspace used as the starting point for this project is the **Budget Planning** template from the Notion Template Gallery.
 
-**Template link:** Notion – Budget Planning
+**Template link:** [Notion – Budget Planning](https://www.notion.com/templates/budget-planning)
+
 
 The n8n workflow expects two separate databases with specific properties. The template should therefore be checked and adapted in your own Notion workspace before connecting it to n8n.
 
